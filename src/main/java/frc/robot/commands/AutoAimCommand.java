@@ -7,6 +7,8 @@ package frc.robot.commands;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -20,19 +22,17 @@ public class AutoAimCommand extends Command {
   private DoubleSupplier ty = () -> LimelightHelpers.getTY(limelightName);
   private DoubleSupplier ta = () -> LimelightHelpers.getTA(limelightName);
   private BooleanSupplier tv = () -> LimelightHelpers.getTV(limelightName);
+  //Pose2d Pose = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose;
 
   private double g = 32;
   private double h = 0;
   private double i = Constants.PhysicsConstants.BallIntialHeight;
-  
 
-  private double getDistance() {
-    double[] Pose = LimelightHelpers.getTargetPose_RobotSpace(limelightName);
-    Translation2d translation2d = new Translation2d(Pose[0], Pose[1]);
-    return translation2d.getDistance(new Translation2d());  
-  }
+  private Translation2d poi;
+
+  
   /** Creates a new AutoAimCommand. */
-  public AutoAimCommand() {
+  public AutoAimCommand(Translation2d poi) {
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -55,6 +55,15 @@ public class AutoAimCommand extends Command {
   public boolean isFinished() {
     return false;
   }
+
+  private double getDistance(Pose2d Pose) {
+    return Pose.getTranslation().getDistance(poi);
+  }
+
+  // private Rotation2d getAngle(Pose2d pose){
+  //   pose.relativeTo(new Pose2d(poi, new Rotation2d()));
+  //   return new Rotation2d();
+  // }
 
   public double CalculateOffset(double Vrz, double Dx, double t){
     return Math.tanh((Vrz* t)/Dx);
