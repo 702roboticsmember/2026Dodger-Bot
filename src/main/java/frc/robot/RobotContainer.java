@@ -109,7 +109,7 @@ public class RobotContainer {
         Shoot.onTrue(shoot(65.6, s_ShooterSubsystem, r_ReleaseSubsystem));
         //Shoot.onTrue(new InstantCommand(()->s_ShooterSubsystem.setVelocity(10)));
         //Shoot.onFalse(new InstantCommand(()->s_ShooterSubsystem.setVelocity(0)));
-        Intake.onTrue(new InstantCommand(()-> i_IntakeSubsystem.set(-1)));
+        Intake.onTrue(new InstantCommand(()-> i_IntakeSubsystem.setSpeed(-1)));
        
         
     }

@@ -231,6 +231,9 @@ public final class Constants {
         
         public static final double MaxIntakeSpeed = 1;
 
+        public static final NeutralModeValue NEUTRAL_MODE_VALUE_BRAKE = NeutralModeValue.Brake;
+        public static final NeutralModeValue NEUTRAL_MODE_VALUE_COAST = NeutralModeValue.Coast;
+        public static final InvertedValue DEFAULT_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
         public static final int STATOR_CURRENT_LIMIT = 60;
         public static final int CURRENT_LIMIT = 55;
         public static final int CURRENT_THRESHOLD = 60;
