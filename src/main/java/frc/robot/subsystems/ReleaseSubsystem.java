@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.MathUtil;
@@ -18,14 +19,14 @@ import java.util.function.DoubleSupplier;
 
 public class ReleaseSubsystem extends SubsystemBase {
 
-  private SparkMax Motor = new SparkMax(Constants.ReleaseConstants.MotorID, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
+  private TalonFX Motor = new TalonFX(Constants.ReleaseConstants.MotorID);
   //  private Spark LeftMotor = new Spark(Constants.CoralIntakeConstants.LeftMotorID);
   // private Spark RightMotor = new Spark(Constants.CoralIntakeConstants.RightMotorID);
 //  private DigitalInput sensor = new DigitalInput(Constants.LIMIT_SWITCH_INTAKE);
   /** Creates a new ClimbSubsystem. */
    public ReleaseSubsystem() {
    
-    Motor.configure(Robot.CTRE_CONFIGS.releaseConfig, Constants.ReleaseConstants.resetMode, Constants.ReleaseConstants.persistMode);
+      Motor.getConfigurator().apply(Robot.CTRE_CONFIGS.releaseConfig);
   // /** Creates a new ReleaseSubsystem. */
  }
 

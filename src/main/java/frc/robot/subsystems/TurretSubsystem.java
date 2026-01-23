@@ -10,17 +10,19 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Robot;
 
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 
 
 public class TurretSubsystem extends SubsystemBase {
-  private TalonSRX Motor = new TalonSRX(0);
+  private TalonFX Motor = new TalonFX(Constants.TurretConstants.TurretMotorID);
   //private SparkMax Motor = new SparkMax(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushed);
   private Encoder m_encoderFR = new Encoder(0, 1);
   
@@ -34,21 +36,21 @@ public class TurretSubsystem extends SubsystemBase {
     
     
 
-    Motor.configAllSettings(Robot.CTRE_CONFIGS.turretConfig);
+      Motor.getConfigurator().apply(Robot.CTRE_CONFIGS.turretConfig);
     
   // /** Creates a new ReleaseSubsystem. */
  }
 
   @Override
   public void periodic() {
-    Motor.setSelectedSensorPosition(getAngle());
+    Motor.setPosition(getAngle());
     SmartDashboard.putNumber("turretangle", getAngle());
    
     // This method will be called once per scheduler run
   }
 
   public void setSpeed(double speed) {
-    Motor.set(ControlMode.PercentOutput, speed);
+    Motor.set(speed);
     SmartDashboard.putBoolean("hiiiiiii", true);
     
     

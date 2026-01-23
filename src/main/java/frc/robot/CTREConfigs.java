@@ -13,8 +13,8 @@ public final class CTREConfigs {
     public CANcoderConfiguration swerveCANcoderConfig = new CANcoderConfiguration();
     public TalonFXConfiguration shooterConfigs = new TalonFXConfiguration();
     public TalonFXConfiguration intakeConfigs = new TalonFXConfiguration();
-    public TalonSRXConfiguration turretConfig = new TalonSRXConfiguration();
-    public SparkMaxConfig releaseConfig = new SparkMaxConfig();
+    public TalonFXConfiguration turretConfig = new TalonFXConfiguration();
+    public TalonFXConfiguration releaseConfig = new TalonFXConfiguration();
 
     public CTREConfigs() {
         /** Swerve CANCoder Configuration */
@@ -71,15 +71,18 @@ public final class CTREConfigs {
         swerveDriveFXConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = Constants.Swerve.CLOSED_LOOP_RAMP;
     
         //turret configs
-            turretConfig.peakCurrentLimit = Constants.TurretConstants.CURRENT_LIMIT;
-            turretConfig.continuousCurrentLimit = Constants.TurretConstants.CURRENT_LIMIT;
+
+            turretConfig.CurrentLimits.StatorCurrentLimit = Constants.TurretConstants.CURRENT_LIMIT;
+            turretConfig.CurrentLimits.SupplyCurrentLimit = Constants.TurretConstants.CURRENT_LIMIT;
+            turretConfig.CurrentLimits.StatorCurrentLimitEnable = Constants.TurretConstants.ENABLE_CURRENT_LIMIT;
+            turretConfig.CurrentLimits.SupplyCurrentLimitEnable = Constants.TurretConstants.ENABLE_CURRENT_LIMIT;
             //turretConfig.
             
 
-            turretConfig.forwardSoftLimitEnable = Constants.TurretConstants.LimitEnable;
-            turretConfig.forwardSoftLimitThreshold = Constants.TurretConstants.forwardSoftLimit;
-            turretConfig.reverseSoftLimitEnable = Constants.TurretConstants.LimitEnable;
-            turretConfig.reverseSoftLimitThreshold = Constants.TurretConstants.reverseSoftLimit;
+            turretConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = Constants.TurretConstants.LimitEnable;
+            turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = -Constants.TurretConstants.forwardSoftLimit;
+            turretConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = Constants.TurretConstants.LimitEnable;
+            turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -Constants.TurretConstants.reverseSoftLimit;
 
         // turretConfig.inverted(Constants.TurretConstants.MotorInverted);
     
@@ -89,7 +92,7 @@ public final class CTREConfigs {
         
         
         // turretConfig.voltageCompensation(0);
-        // turretConfig.softLimit.forwardSoftLimit(Constants.TurretConstants.forwardSoftLimit);
+        //turretConfig.softLimit.forwardSoftLimit(Constants.TurretConstants.forwardSoftLimit);
         // turretConfig.softLimit.forwardSoftLimitEnabled(Constants.TurretConstants.LimitEnable);
         // turretConfig.softLimit.reverseSoftLimit(Constants.TurretConstants.reverseSoftLimit);
         // turretConfig.softLimit.reverseSoftLimitEnabled(Constants.TurretConstants.LimitEnable);
@@ -132,11 +135,15 @@ public final class CTREConfigs {
         i_motoroutput.Inverted = InvertedValue.Clockwise_Positive;
 
         //release configs
-        releaseConfig.inverted(Constants.ReleaseConstants.MotorInverted);
+        releaseConfig.MotorOutput.Inverted = Constants.ReleaseConstants.MotorInverted;
     
-        releaseConfig.smartCurrentLimit(Constants.ReleaseConstants.CURRENT_LIMIT);
+        releaseConfig.CurrentLimits.StatorCurrentLimit = (Constants.ReleaseConstants.CURRENT_LIMIT);
+        releaseConfig.CurrentLimits.SupplyCurrentLimit = (Constants.ReleaseConstants.CURRENT_LIMIT);
+        releaseConfig.CurrentLimits.StatorCurrentLimitEnable = (Constants.ReleaseConstants.ENABLE_CURRENT_LIMIT);
+        releaseConfig.CurrentLimits.SupplyCurrentLimitEnable = (Constants.ReleaseConstants.ENABLE_CURRENT_LIMIT);
+
     
-        releaseConfig.idleMode(Constants.ReleaseConstants.MotorMode);
+        releaseConfig.MotorOutput.NeutralMode = Constants.ReleaseConstants.MotorMode;
 
     }
 }

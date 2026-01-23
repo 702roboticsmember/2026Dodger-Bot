@@ -183,6 +183,14 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    public Pose2d limelightPoseAdjusted(Pose2d pose){
+        double y = 0;
+        double x = 0;
+        Rotation2d a = swervePoseEstimator.getEstimatedPosition().getRotation();
+       return new Pose2d(pose.getX() + (a.getCos()* x) - (a.getSin() * y ), pose.getY() + (a.getCos()* y) - (a.getSin() * x ), a);
+        // return new Pose2d(pose.getX(), pose.getY(), swervePoseEstimator.getEstimatedPosition().getRotation());
+    }
+
     @Override
     public void periodic() {
     
@@ -194,13 +202,17 @@ public class Swerve extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
 
-        
+        if (this.limelightMeasurement != null){
     if (limelightMeasurement.tagCount >= 2) {  // Only trust measurement if we see multiple tags
         swervePoseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
         swervePoseEstimator.addVisionMeasurement(
-            limelightMeasurement.pose,
+            limelightPoseAdjusted(limelightMeasurement.pose),
             limelightMeasurement.timestampSeconds
     );
-}
+
     }
+}
+
+}
+    
 }

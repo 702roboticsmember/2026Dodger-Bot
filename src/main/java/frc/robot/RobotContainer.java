@@ -4,6 +4,8 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
+
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -31,12 +33,13 @@ public class RobotContainer {
     private final XboxController codriver = new XboxController(1);
     //private final JoystickButton Shoot = new JoystickButton(driver, XboxController.Button.kRightBumper.value);
     private final JoystickButton Intake = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
+    private final JoystickButton smartAim = new JoystickButton(driver, XboxController.Button.kX.value);
 
     private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
     private final JoystickButton fastMode = new JoystickButton(driver, XboxController.Button.kB.value);
     private final JoystickButton slowMode = new JoystickButton(driver, XboxController.Button.kA.value);
-    private final JoystickButton smartShoot = new JoystickButton(codriver, XboxController.Button.kA.value);
-    private final JoystickButton Shoot = new JoystickButton(codriver, XboxController.Button.kRightBumper.value);
+    //private final JoystickButton smartShoot = new JoystickButton(codriver, XboxController.Button.kA.value);
+    private final JoystickButton Shoot = new JoystickButton(driver, XboxController.Button.kRightBumper.value);
     public static double power = 1;
     public static boolean robotCentric = false;
     private final SendableChooser<Command> autoChooser;
@@ -47,18 +50,15 @@ public class RobotContainer {
     private final Swerve s_Swerve = new Swerve();
     private final ShooterSubsystem s_ShooterSubsystem = new ShooterSubsystem();
     private final IntakeSubsystem i_IntakeSubsystem = new IntakeSubsystem();
-    // private final TurretSubsystem t_TurretSubsystem = new TurretSubsystem();
-    private final ReleaseSubsystem r_ReleaseSubsystem = new ReleaseSubsystem();
+     private final TurretSubsystem t_TurretSubsystem = new TurretSubsystem();
+    //private final ReleaseSubsystem r_ReleaseSubsystem = new ReleaseSubsystem();
 
-    public Command shoot(double velocity, ShooterSubsystem s_ShooterSubsystem, ReleaseSubsystem r_ReleaseSubsystem){
+    public Command shoot(double velocity, ShooterSubsystem s_ShooterSubsystem){
         
         return new SequentialCommandGroup(
-            new InstantCommand(()->s_ShooterSubsystem.setVelocity(velocity)),
+            new InstantCommand(()->s_ShooterSubsystem.setVelocity(-velocity)),
             new WaitCommand(1),
-            new InstantCommand(()->r_ReleaseSubsystem.setSpeed(0.3)),
-            new WaitCommand(1),
-            new InstantCommand(()->s_ShooterSubsystem.set(0)),
-            new InstantCommand(()->r_ReleaseSubsystem.setSpeed(0.0))
+            new InstantCommand(()->s_ShooterSubsystem.setVelocity(0.0))
         );
     }
 
@@ -82,10 +82,12 @@ public class RobotContainer {
         s_Swerve.setDefaultCommand(new TeleopSwerve(s_Swerve, 
         ()-> -driver.getRawAxis(1) * power, 
         ()-> -driver.getRawAxis(0) * power,
-        ()-> -driver.getRawAxis(4) * power, 
+        ()-> -driver.getRawAxis(4) * power*1.01, 
         ()->robotCentric));
 
-        // t_TurretSubsystem.setDefaultCommand(t_TurretSubsystem.run(()-> codriver.getRawAxis(4) * 0.3));
+
+
+        t_TurretSubsystem.setDefaultCommand(t_TurretSubsystem.run(()-> codriver.getRawAxis(4) * 0.3));
         //r_ReleaseSubsystem.setDefaultCommand(r_ReleaseSubsystem.run(()-> codriver.getRawAxis(3) * 0.3));
         
         //s_ShooterSubsystem.setDefaultCommand(s_ShooterSubsystem.runCmd(()-> codriver.getRawAxis(2) * 1));
@@ -106,10 +108,13 @@ public class RobotContainer {
         zeroGyro.onTrue(new ParallelCommandGroup(new InstantCommand(() -> s_Swerve.zeroHeading()), new InstantCommand(()->s_Swerve.gyro.reset())));
         slowMode.onTrue(new InstantCommand(() -> RobotContainer.power = .333));
         fastMode.onTrue(new InstantCommand(() -> RobotContainer.power = 1));  
-        Shoot.onTrue(shoot(65.6, s_ShooterSubsystem, r_ReleaseSubsystem));
+        Shoot.onTrue(shoot(65.6, s_ShooterSubsystem));
         //Shoot.onTrue(new InstantCommand(()->s_ShooterSubsystem.setVelocity(10)));
         //Shoot.onFalse(new InstantCommand(()->s_ShooterSubsystem.setVelocity(0)));
-        Intake.onTrue(new InstantCommand(()-> i_IntakeSubsystem.setSpeed(-1)));
+        Intake.whileTrue(new InstantCommand(()-> i_IntakeSubsystem.setSpeed(1)));
+        Intake.whileFalse(new InstantCommand(()-> i_IntakeSubsystem.setSpeed(0)));
+        smartAim.whileTrue(new AutoAimCommand(new Translation2d(11.91, 4.02), t_TurretSubsystem));
+
        
         
     }

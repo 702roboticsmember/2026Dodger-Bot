@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -8,6 +10,13 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 //import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 //import com.pathplanner.lib.util.PIDConstants;
@@ -112,7 +121,7 @@ public final class Constants {
          * loop driving.
          * We found a small open loop ramp (0.25) helps with tread wear, tipping, etc
          */
-        public static final double OPEN_LOOP_RAMP = 0.45;
+        public static final double OPEN_LOOP_RAMP = 0.55;
         public static final double CLOSED_LOOP_RAMP = 0;
 
         public static final PIDConstants ANGLE_PID = new PIDConstants(FALCON_500_CONSTANTS.angleKP,
@@ -139,7 +148,7 @@ public final class Constants {
             public static final int driveMotorID = 1;
             public static final int angleMotorID = 2;
             public static final int canCoderID = 3;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(-177.89); //2.11
+            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(-178.945); //2.11
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
         }
@@ -149,7 +158,7 @@ public final class Constants {
             public static final int driveMotorID = 4;
             public static final int angleMotorID = 5;
             public static final int canCoderID = 6;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(34.89); //-145.11
+            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(35.08); //-145.11
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
         }
@@ -158,7 +167,7 @@ public final class Constants {
             public static final int driveMotorID = 7;
             public static final int angleMotorID = 8;
             public static final int canCoderID = 9;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(166.6);//-13.4
+            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(168.047);//-13.4
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
         }
@@ -168,7 +177,7 @@ public final class Constants {
             public static final int driveMotorID = 10;
             public static final int angleMotorID = 11;
             public static final int canCoderID = 12;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(-80); //-101
+            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(-72.598); //-101
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
         }
@@ -194,7 +203,8 @@ public final class Constants {
         public static final double forwardSoftLimit = 40;
         public static final boolean LimitEnable = true;
         public static final boolean MotorInverted = false;
-        //public static final IdleMode MotorMode = IdleMode.kBrake;
+        
+        public static final IdleMode MotorMode = IdleMode.kBrake;
 
         
         public static final int CURRENT_LIMIT = 50;
@@ -219,15 +229,16 @@ public final class Constants {
 
         public static final PersistMode persistMode = null;
 
-        public static final boolean MotorInverted = false;
+        public static final InvertedValue MotorInverted = InvertedValue.Clockwise_Positive;
 
-        public static final IdleMode MotorMode = IdleMode.kBrake;
+        public static final NeutralModeValue MotorMode = NeutralModeValue.Brake;
+
 
     }
 
     public static final class IntakeConstants {
         
-        public static final int IntakeMotorID = 14;
+        public static final int IntakeMotorID = 16;
         
         public static final double MaxIntakeSpeed = 1;
 
@@ -243,7 +254,7 @@ public final class Constants {
     }
 
     public static final class ShootSubsystem {
-        public static final int ShootMotorID = 32;
+        public static final int ShootMotorID = 19;
 
         public static final InvertedValue ShootMotorInverted = InvertedValue.Clockwise_Positive;
         

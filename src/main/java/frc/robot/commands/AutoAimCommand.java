@@ -7,32 +7,42 @@ package frc.robot.commands;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.estimator.PoseEstimator;
+import edu.wpi.first.math.estimator.PoseEstimator3d;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
+import frc.robot.Constants.Swerve;
+import frc.robot.subsystems.TurretSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAimCommand extends Command {
   private String limelightName = Constants.limelightConstants.limelightName;
   private double txOffset;
-  private DoubleSupplier tx = () -> LimelightHelpers.getTX(limelightName);
-  private DoubleSupplier ty = () -> LimelightHelpers.getTY(limelightName);
-  private DoubleSupplier ta = () -> LimelightHelpers.getTA(limelightName);
-  private BooleanSupplier tv = () -> LimelightHelpers.getTV(limelightName);
+ 
+  private TurretSubsystem t_TurretSubsystem ;
+  private Swerve s_Swerve;
   //Pose2d Pose = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose;
 
-  private double g = 32;
-  private double h = 0;
+  private double g = Constants.PhysicsConstants.gravity;
+  private double h = Constants.PhysicsConstants.HubHeight;
   private double i = Constants.PhysicsConstants.BallIntialHeight;
 
   private Translation2d poi;
+ // private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(null, null, null, null);
+  
 
   
   /** Creates a new AutoAimCommand. */
-  public AutoAimCommand(Translation2d poi) {
+  public AutoAimCommand(Translation2d poi, TurretSubsystem t_TurretSubsystem, Swerve s_Swerve) {
+    this.t_TurretSubsystem = t_TurretSubsystem;
+    addRequirements(t_TurretSubsystem);
+    this.poi = poi;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -43,7 +53,14 @@ public class AutoAimCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if (LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose != null){
+    Pose2d pose = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose;
+    //Pose2d angle = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).angle;
+    SmartDashboard.putNumber("getDistance", getDistance(pose));
+    SmartDashboard.putNumber("getAngle", getAngleToHub(pose).getDegrees());
+    SmartDashboard.putNumber("getturretAngletohub", getTurretAngleToHub(pose).getDegrees());
 
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -60,10 +77,14 @@ public class AutoAimCommand extends Command {
     return Pose.getTranslation().getDistance(poi);
   }
 
-  // private Rotation2d getAngle(Pose2d pose){
-  //   pose.relativeTo(new Pose2d(poi, new Rotation2d()));
-  //   return new Rotation2d();
-  // }
+  private Rotation2d getAngleToHub(Pose2d Pose){
+    return poi.minus(Pose.getTranslation()).getAngle();
+  }
+
+  public Rotation2d getTurretAngleToHub(Pose2d pose){
+    return getAngleToHub(pose).minus(pose.getRotation());
+  }
+
 
   public double CalculateOffset(double Vrz, double Dx, double t){
     return Math.tanh((Vrz* t)/Dx);
@@ -73,6 +94,15 @@ public class AutoAimCommand extends Command {
     return 0.322959*Dx + 19.09439;
   }
 
+  public double timeTillTarget(double Vy){
+    double a = -g * 0.5;
+    double b = Vy;
+    double c = -(h-i);
+    return (-b) - Math.sqrt((b * b) - (4* a * c));
+
+  }
+
+
   public double CalculateVx(double distance, double Vy){
     double a = -g * distance * distance * 0.5;
     double b = Vy*distance;
@@ -80,7 +110,15 @@ public class AutoAimCommand extends Command {
     return (2*(a)) / ((-b) - Math.sqrt((b * b) - 4*(a * c)));
   }
 
-  public double CalculateVs(){
-    return 0;
+  public double CalculateVs(double Vx, double Vy, double Vrx){
+    return Math.sqrt(((Vx - Vrx) * (Vx - Vrx)) + (Vy * Vy));
+  }
+
+  public double CalculateShootAngle(double Vx, double Vy, double Vrx){
+    return Math.tanh(Vy/(Vx - Vrx));
+  }
+
+  public double getVrz(Pose2d pose, double Vz){
+    return getTurretAngleToHub(pose).getCos() * Vz;
   }
 }
