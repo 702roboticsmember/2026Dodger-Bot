@@ -186,7 +186,7 @@ public class Swerve extends SubsystemBase {
     public Pose2d limelightPoseAdjusted(Pose2d pose){
         double y = 0;
         double x = 0;
-        Rotation2d a = swervePoseEstimator.getEstimatedPosition().getRotation();
+        Rotation2d a = getGyroYaw();
        return new Pose2d(pose.getX() + (a.getCos()* x) - (a.getSin() * y ), pose.getY() + (a.getCos()* y) - (a.getSin() * x ), a);
         // return new Pose2d(pose.getX(), pose.getY(), swervePoseEstimator.getEstimatedPosition().getRotation());
     }
