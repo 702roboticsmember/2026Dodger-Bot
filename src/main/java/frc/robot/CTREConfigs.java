@@ -84,6 +84,8 @@ public final class CTREConfigs {
             turretConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = Constants.TurretConstants.LimitEnable;
             turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -Constants.TurretConstants.reverseSoftLimit;
 
+            turretConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
         // turretConfig.inverted(Constants.TurretConstants.MotorInverted);
     
         // turretConfig.smartCurrentLimit(Constants.TurretConstants.CURRENT_LIMIT);
@@ -91,8 +93,8 @@ public final class CTREConfigs {
         // turretConfig.idleMode(Constants.TurretConstants.MotorMode);
         
         
-        // turretConfig.voltageCompensation(0);
-        //turretConfig.softLimit.forwardSoftLimit(Constants.TurretConstants.forwardSoftLimit);
+        //turretConfig.voltageCompensation(0);
+        // turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold(Constants.TurretConstants.forwardSoftLimit);
         // turretConfig.softLimit.forwardSoftLimitEnabled(Constants.TurretConstants.LimitEnable);
         // turretConfig.softLimit.reverseSoftLimit(Constants.TurretConstants.reverseSoftLimit);
         // turretConfig.softLimit.reverseSoftLimitEnabled(Constants.TurretConstants.LimitEnable);
