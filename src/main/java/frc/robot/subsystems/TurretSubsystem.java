@@ -6,7 +6,10 @@ package frc.robot.subsystems;
 
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,6 +20,7 @@ import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 
@@ -24,7 +28,20 @@ import com.ctre.phoenix6.hardware.TalonFX;
 public class TurretSubsystem extends SubsystemBase {
   private TalonFX Motor = new TalonFX(Constants.TurretConstants.TurretMotorID);
   //private SparkMax Motor = new SparkMax(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushed);
-  private Encoder m_encoderFR = new Encoder(0, 1);
+   private static double kDt = 0.02;
+
+  
+  
+  // Note: These gains are fake, and will have to be tuned for your robot.
+  private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 1.5);
+
+  // Create a motion profile with the given maximum velocity and maximum
+  // acceleration constraints for the next setpoint.
+  private final TrapezoidProfile m_profile =
+      new TrapezoidProfile(new TrapezoidProfile.Constraints(1.75, 0.75));
+  private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
+  private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
+
   
   
   // private Spark LeftMotor = new Spark(Constants.CoralIntakeConstants.LeftMotorID);
@@ -33,10 +50,24 @@ public class TurretSubsystem extends SubsystemBase {
   /** Creates a new ClimbSubsystem. */
    public TurretSubsystem() { 
     //m_encoderFR.setSimDevice(SimDevice.create("encoder"));
+    TalonFXConfiguration turretConfig = new TalonFXConfiguration();
+      turretConfig.CurrentLimits.StatorCurrentLimit = Constants.TurretConstants.CURRENT_LIMIT;
+            turretConfig.CurrentLimits.SupplyCurrentLimit = Constants.TurretConstants.CURRENT_LIMIT;
+            turretConfig.CurrentLimits.StatorCurrentLimitEnable = Constants.TurretConstants.ENABLE_CURRENT_LIMIT;
+            turretConfig.CurrentLimits.SupplyCurrentLimitEnable = Constants.TurretConstants.ENABLE_CURRENT_LIMIT;
+            //turretConfig.
+            
+
+            turretConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = Constants.TurretConstants.LimitEnable;
+            turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = -Constants.TurretConstants.forwardSoftLimit;
+            turretConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = Constants.TurretConstants.LimitEnable;
+            turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -Constants.TurretConstants.reverseSoftLimit;
+
+            
     
     
 
-      Motor.getConfigurator().apply(Robot.CTRE_CONFIGS.turretConfig);
+      Motor.getConfigurator().apply(turretConfig);
     
   // /** Creates a new ReleaseSubsystem. */
  }
@@ -66,6 +97,7 @@ public class TurretSubsystem extends SubsystemBase {
    
     
     return -(m_encoderFR.getDistance()/28000) * 360;
+    
     
   }
   
