@@ -36,6 +36,7 @@ public class RobotContainer {
     private final JoystickButton smartAim = new JoystickButton(driver, XboxController.Button.kX.value);
 
     private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
+    private final JoystickButton homeGyro = new JoystickButton(driver, XboxController.Button.kStart.value);
     private final JoystickButton fastMode = new JoystickButton(driver, XboxController.Button.kB.value);
     private final JoystickButton slowMode = new JoystickButton(driver, XboxController.Button.kA.value);
     //private final JoystickButton smartShoot = new JoystickButton(codriver, XboxController.Button.kA.value);
@@ -68,6 +69,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         Field2d field = new Field2d();
+        Field2d fieldActive = new Field2d();
         SmartDashboard.putData("Field", field);
         PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
             field.setRobotPose(pose);
@@ -78,6 +80,8 @@ public class RobotContainer {
         PathPlannerLogging.setLogActivePathCallback((poses) -> {
             field.getObject("path").setPoses(poses);
         });
+        fieldActive.setRobotPose(s_Swerve.getPose());
+         SmartDashboard.putData("FieldActive", fieldActive);
 
         s_Swerve.setDefaultCommand(new TeleopSwerve(s_Swerve, 
         ()-> -driver.getRawAxis(1) * power, 
@@ -106,13 +110,16 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
         zeroGyro.onTrue(new ParallelCommandGroup(new InstantCommand(() -> s_Swerve.zeroHeading()), new InstantCommand(()->s_Swerve.gyro.reset())));
+        homeGyro.onTrue(new InstantCommand(()->{s_Swerve.setposetoField();}));
         slowMode.onTrue(new InstantCommand(() -> RobotContainer.power = .333));
         fastMode.onTrue(new InstantCommand(() -> RobotContainer.power = 1));  
-        Shoot.onTrue(shoot(65.6, s_ShooterSubsystem));
+        Shoot.onTrue(t_TurretSubsystem.run(()->-0.019));
         //Shoot.onTrue(new InstantCommand(()->s_ShooterSubsystem.setVelocity(10)));
         //Shoot.onFalse(new InstantCommand(()->s_ShooterSubsystem.setVelocity(0)));
-        Intake.whileTrue(new InstantCommand(()-> i_IntakeSubsystem.setSpeed(1)));
-        Intake.whileFalse(new InstantCommand(()-> i_IntakeSubsystem.setSpeed(0)));
+        // Intake.whileTrue(new InstantCommand(()-> i_IntakeSubsystem.setSpeed(1)));
+        // Intake.whileFalse(new InstantCommand(()-> i_IntakeSubsystem.setSpeed(0)));
+        Intake.whileTrue(t_TurretSubsystem.run(()-> 0.019));
+        Intake.whileFalse(new InstantCommand(()-> t_TurretSubsystem.setSpeed(0)));
         smartAim.whileTrue(new AutoAimCommand(new Translation2d(11.91, 4.02), t_TurretSubsystem));
 
        

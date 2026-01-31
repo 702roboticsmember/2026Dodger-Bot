@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 // import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -39,6 +40,7 @@ public class Robot extends TimedRobot {
     // and put our
     // autonomous chooser on the dashboard.
     CameraServer.startAutomaticCapture();
+    LimelightHelpers.SetIMUMode("limelight", 3);
     robotContainer = new RobotContainer();
     
   }
@@ -101,6 +103,17 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+     var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        if(alliance.get() == DriverStation.Alliance.Red){
+                            Constants.Swerve.BLUE_ALLIANCE = false;}
+                            else{
+                                Constants.Swerve.BLUE_ALLIANCE = true;
+                            }
+                      
+                    }
+                    
+                    
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

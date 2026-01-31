@@ -35,7 +35,7 @@ public class TurretPIDCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double value = ArmPID.calculate(t_TurretSubsystem.getAngle());
+    double value = ArmPID.calculate(t_TurretSubsystem.getAngleAsDouble());
     t_TurretSubsystem.setSpeed(value);
   }
 

@@ -18,6 +18,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
 //import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 //import com.pathplanner.lib.util.PIDConstants;
 // import com.pathplanner.lib.util.ReplanningConfig;
@@ -58,9 +60,11 @@ public final class Constants {
     }
 
     public static final class Swerve {
+        public static SwerveDrivePoseEstimator swervePoseEstimator;
+        public static Boolean BLUE_ALLIANCE = true;
 
         public static final boolean INVERT_GYRO = true;
-        public static final COTSTalonFXSwerveConstants FALCON_500_CONSTANTS = Falcon500(driveRatios.L2);
+        public static final COTSTalonFXSwerveConstants FALCON_500_CONSTANTS = Falcon500(driveRatios.L3);
 
         /**
          * Units: Meters
@@ -189,18 +193,24 @@ public final class Constants {
                 // new ReplanningConfig()
                 );
 
+        public static final double LIMELIGHT_TURRET_POSE_Y = 0;
+
+        public static final double LIMELIGHT_TURRET_POSE_X = 0.2;
+
     }
 
     public static final class TurretConstants {
+        public static Pose2d turretPose2d = new Pose2d();
+
         public static final int TurretMotorID = 13;
 
         public static final double kP = 0.057;
         public static final double kI = 0.0014;
         public static final double kD = 0.0042;
 
-        public static final double PIDTolerance = 1.0;
-        public static final double reverseSoftLimit = -85;
-        public static final double forwardSoftLimit = 40;
+        public static final double PIDTolerance = 0.1;
+        public static final double reverseSoftLimit = 2; //-85
+        public static final double forwardSoftLimit = -2; //40
         public static final boolean LimitEnable = true;
         public static final boolean MotorInverted = false;
         
@@ -214,6 +224,8 @@ public final class Constants {
         public static final ResetMode resetMode = null;
 
         public static final PersistMode persistMode = null;
+
+        public static final double initialAngle = 0;
         
 
     }
