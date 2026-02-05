@@ -8,19 +8,24 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.PoseEstimator3d;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants.Swerve;
+import frc.robot.LimelightHelpers.IMUData;
 import frc.robot.subsystems.TurretSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -36,12 +41,24 @@ public class AutoAimCommand extends Command {
   private double h = Constants.PhysicsConstants.HubHeight;
   private double i = Constants.PhysicsConstants.BallIntialHeight;
 
+  private double kDt = 0.2;
+  private double past;
+
+private double kS = 1.1;
+  private double kG = 1.2;
+  private double kV = 1.3;
+
   private Translation2d poi;
 
    private PIDController ArmPID = new PIDController(
       0.008,
       0.0,
       0.0001);
+  // private TrapezoidProfile.Constraints m_constraints =
+  //     new TrapezoidProfile.Constraints(0.01, 0.01);
+  // private ProfiledPIDController m_controller =
+  //     new ProfiledPIDController(0.0, 0.0, 0.0, m_constraints, kDt);
+  // private ElevatorFeedforward m_feedforward = new ElevatorFeedforward(kS, kG, kV);
 
 
  // private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(null, null, null, null);
@@ -60,29 +77,46 @@ public class AutoAimCommand extends Command {
   @Override
   public void initialize() {
     ArmPID.setTolerance(0.01);
+    kDt = 0.2;
+    past = Timer.getFPGATimestamp();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
      Field2d fieldActive = new Field2d();
-     
-    Pose2d pose2 = Constants.TurretConstants.turretPose2d;
+    Pose2d pose = Constants.TurretConstants.turretPose2d;
+    Pose2d pose2 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose;
     double degrees = getTurretAngleToHub(pose2).getDegrees();
     if (LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose != null){
-    Pose2d pose = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose;
+    pose2 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose;
     //Pose2d angle = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).angle;
     SmartDashboard.putNumber("getDistance", getDistance(pose));
     SmartDashboard.putNumber("getAngle", getAngleToHub(pose).getDegrees());
     SmartDashboard.putNumber("getturretAngletohub", getTurretAngleToHub(pose).getDegrees());
 
-    }
+    
     SmartDashboard.putNumber("getDistanceS", getDistance(pose2));
     SmartDashboard.putNumber("getAngleS", getAngleToHub(pose2).getDegrees());
     SmartDashboard.putNumber("getturretAngletohubS", degrees);
-     SmartDashboard.putNumber("getturretAngle", getTurretAngle(pose2).getDegrees());
-      fieldActive.setRobotPose(pose2);
-      SmartDashboard.putData("Fieldtest", fieldActive);
+    SmartDashboard.putNumber("getturretAngle", getTurretAngle(pose2).getDegrees());
+
+
+    fieldActive.setRobotPose(pose2);
+    }
+    //SmartDashboard.putData("Fieldtest", fieldActive);
+  //   if (pose2 != null){
+  //   t_TurretSubsystem.setVoltage(
+  //       m_controller.calculate(getTurretAngleToHub(pose2).getDegrees(),0)
+  //       + m_feedforward.calculate(m_controller.getSetpoint().velocity));
+  //       SmartDashboard.putNumber("CalculatedFeed",m_feedforward.calculate(m_controller.getSetpoint().velocity));
+  // }
+  //     SmartDashboard.putNumber("Controller Velocity", m_controller.getSetpoint().velocity);
+
+
+
+
+
       ArmPID.setSetpoint(0);
        double value = ArmPID.calculate(degrees);
        if(value > 0){
@@ -91,11 +125,29 @@ public class AutoAimCommand extends Command {
         value += -0.017;
        }
        SmartDashboard.putNumber("hubpid", value);
-    t_TurretSubsystem.setSpeed(MathUtil.clamp(value, -0.6, 0.6));
-      
+    //t_TurretSubsystem.setSpeed(MathUtil.clamp(value, -0.6, 0.6));
+     TrapezoidProfile m_profile =
+      new TrapezoidProfile(new TrapezoidProfile.Constraints(37.5, 7.5));
+      TrapezoidProfile.State m_goal = new TrapezoidProfile.State(0, 0);
+
+    // // Retrieve the profiled setpoint for the next timestep. This setpoint moves
+    // // toward the goal while obeying the constraints.
+    TrapezoidProfile.State currentState = new TrapezoidProfile.State(degrees, t_TurretSubsystem.getVel()*12);
+    
+    kDt = 0.0;
+
+    t_TurretSubsystem.setpoint(m_profile.calculate(kDt, currentState, m_goal));
+    SmartDashboard.putNumber("st",m_profile.timeLeftUntil(0));
+    SmartDashboard.putNumber("st2",m_profile.totalTime());
+    SmartDashboard.putNumber("spos", currentState.position);
+    SmartDashboard.putNumber("svel", currentState.velocity);
+   //SmartDashboard.putBoolean("sdobe", m_profile.);
+
+    
+    past = Timer.getFPGATimestamp();
+
 
   }
-
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {}
@@ -163,5 +215,4 @@ public class AutoAimCommand extends Command {
     return LimelightHelpers.getIMUData("limelight").gyroY;
   }
 
- 
 }
