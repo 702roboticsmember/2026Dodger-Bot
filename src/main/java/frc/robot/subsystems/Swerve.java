@@ -207,6 +207,16 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    public double getGyroVelX(){
+        return gyro.getRobotCentricVelocityX();
+    }
+    public double getGyroVelY(){
+        return gyro.getRobotCentricVelocityY();
+    }
+    public double getGyroVelZ(){
+        return gyro.getRobotCentricVelocityZ();
+    }
+
     public Pose2d limelightTurretPoseAdjustedToRobot(Pose2d pose){
         double y = Constants.Swerve.LIMELIGHT_TURRET_POSE_Y;
         double x =  Constants.Swerve.LIMELIGHT_TURRET_POSE_X;
@@ -241,10 +251,7 @@ public class Swerve extends SubsystemBase {
     public void periodic() {
         limelightMeasurement =  LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
         Constants.Swerve.swervePoseEstimator.update(getGyroYaw(), getModulePositions());
-        SmartDashboard.putNumber("x", Constants.Swerve.swervePoseEstimator.getEstimatedPosition().getX());
-        SmartDashboard.putNumber("y", Constants.Swerve.swervePoseEstimator.getEstimatedPosition().getY());
-        SmartDashboard.putNumber("llx", limelightMeasurement.pose.getX());
-        SmartDashboard.putNumber("lly", limelightMeasurement.pose.getY());
+       
         
         
         SmartDashboard.putNumber("Acc",this.getAcc());
@@ -256,6 +263,11 @@ public class Swerve extends SubsystemBase {
 
         if (this.limelightMeasurement != null){
             SmartDashboard.putBoolean("local1", true);
+            Constants.TurretConstants.turretPose2d=RobotPoseAdjustedTolimelightTurret(Constants.Swerve.swervePoseEstimator.getEstimatedPosition());
+             SmartDashboard.putNumber("x", Constants.Swerve.swervePoseEstimator.getEstimatedPosition().getX());
+        SmartDashboard.putNumber("y", Constants.Swerve.swervePoseEstimator.getEstimatedPosition().getY());
+        SmartDashboard.putNumber("llx", limelightMeasurement.pose.getX());
+        SmartDashboard.putNumber("lly", limelightMeasurement.pose.getY());
     if (limelightMeasurement.tagCount >= 2) {
         SmartDashboard.putBoolean("local", true);  // Only trust measurement if we see multiple tags
         Constants.Swerve.swervePoseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
@@ -266,7 +278,7 @@ public class Swerve extends SubsystemBase {
 
     }
 }
-    Constants.TurretConstants.turretPose2d=RobotPoseAdjustedTolimelightTurret(Constants.Swerve.swervePoseEstimator.getEstimatedPosition());
+    
 }
     
 }

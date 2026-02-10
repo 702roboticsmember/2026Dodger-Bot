@@ -101,29 +101,7 @@ public final class CTREConfigs {
    
 
         //shooter configs
-        var s_currentlimits = shooterConfigs.CurrentLimits;
-        s_currentlimits.StatorCurrentLimit = Constants.ShootSubsystem.STATOR_CURRENT_LIMIT;
-        s_currentlimits.StatorCurrentLimitEnable = Constants.ShootSubsystem.ENABLE_STATOR_CURRENT_LIMIT;
-        s_currentlimits.SupplyCurrentLimit = Constants.ShootSubsystem.CURRENT_LIMIT;
-        s_currentlimits.SupplyCurrentLimitEnable = Constants.ShootSubsystem.ENABLE_CURRENT_LIMIT;
-
-        var s_motoroutput = shooterConfigs.MotorOutput;
-        s_motoroutput.NeutralMode = Constants.ShootSubsystem.ShootMotorMode;
-        s_motoroutput.Inverted = Constants.ShootSubsystem.ShootMotorInverted;
-
-        var s_slot0Configs = shooterConfigs.Slot0;
-        s_slot0Configs.kS = Constants.ShootSubsystem.kS; // Add 0.25 V output to overcome static friction
-        s_slot0Configs.kV = Constants.ShootSubsystem.kV; // A velocity target of 1 rps results in 0.12 V output
-        s_slot0Configs.kA = Constants.ShootSubsystem.kA; // An acceleration of 1 rps/s requires 0.01 V output
-        s_slot0Configs.kP = Constants.ShootSubsystem.kP; // An error of 1 rps results in 0.11 V output
-        s_slot0Configs.kI = Constants.ShootSubsystem.kI; // no output for integrated error
-        s_slot0Configs.kD = Constants.ShootSubsystem.kD; // no output for error derivative
-
-        // set Motion Magic Velocity settings
-        var s_motionMagicConfigs = shooterConfigs.MotionMagic;
-        s_motionMagicConfigs.MotionMagicAcceleration = Constants.ShootSubsystem.MotionMagicAcceleration; // Target acceleration of 400 rps/s (0.25 seconds to max)
-        s_motionMagicConfigs.MotionMagicJerk = Constants.ShootSubsystem.MotionMagicJerk; // Target jerk of 4000 rps/s/s (0.1 seconds)
-
+        
 
         //intake configs
         var i_currentlimits = intakeConfigs.CurrentLimits;

@@ -8,6 +8,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -26,6 +27,8 @@ import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants.Swerve;
 import frc.robot.LimelightHelpers.IMUData;
+import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -34,41 +37,26 @@ public class AutoAimCommand extends Command {
   private double txOffset;
  
   private TurretSubsystem t_TurretSubsystem ;
-  private Swerve s_Swerve;
-  //Pose2d Pose = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose;
+  private HoodSubsystem h_HoodSubsystem;
+  private ShooterSubsystem s_ShooterSubsystem;
+  
 
   private double g = Constants.PhysicsConstants.gravity;
   private double h = Constants.PhysicsConstants.HubHeight;
   private double i = Constants.PhysicsConstants.BallIntialHeight;
 
-  private double kDt = 0.2;
-  private double past;
-
-private double kS = 1.1;
-  private double kG = 1.2;
-  private double kV = 1.3;
-
   private Translation2d poi;
-
-   private PIDController ArmPID = new PIDController(
-      0.008,
-      0.0,
-      0.0001);
-  // private TrapezoidProfile.Constraints m_constraints =
-  //     new TrapezoidProfile.Constraints(0.01, 0.01);
-  // private ProfiledPIDController m_controller =
-  //     new ProfiledPIDController(0.0, 0.0, 0.0, m_constraints, kDt);
-  // private ElevatorFeedforward m_feedforward = new ElevatorFeedforward(kS, kG, kV);
-
-
- // private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(null, null, null, null);
-  
+  public LimelightHelpers.PoseEstimate limelightMeasurement;
+ 
+ 
 
   
   /** Creates a new AutoAimCommand. */
-  public AutoAimCommand(Translation2d poi, TurretSubsystem t_TurretSubsystem) {
+  public AutoAimCommand(Translation2d poi, TurretSubsystem t_TurretSubsystem, HoodSubsystem h_HoodSubsystem, ShooterSubsystem s_ShooterSubsystem) {
     this.t_TurretSubsystem = t_TurretSubsystem;
-    addRequirements(t_TurretSubsystem);
+    this.s_ShooterSubsystem = s_ShooterSubsystem;
+    this.h_HoodSubsystem = h_HoodSubsystem;
+    addRequirements(t_TurretSubsystem, h_HoodSubsystem, s_ShooterSubsystem);
     this.poi = poi;
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -76,19 +64,20 @@ private double kS = 1.1;
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    ArmPID.setTolerance(0.01);
-    kDt = 0.2;
-    past = Timer.getFPGATimestamp();
+    
+    
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-     Field2d fieldActive = new Field2d();
+    
     Pose2d pose = Constants.TurretConstants.turretPose2d;
-    Pose2d pose2 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose;
-    double degrees = getTurretAngleToHub(pose2).getDegrees();
-    if (LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose != null){
+    limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
+    
+    if (limelightMeasurement != null){
+      Pose2d pose2 = limelightMeasurement.pose;
+      double degrees = getTurretAngleToHub(pose2).getDegrees();
     pose2 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).pose;
     //Pose2d angle = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName).angle;
     SmartDashboard.putNumber("getDistance", getDistance(pose));
@@ -100,52 +89,23 @@ private double kS = 1.1;
     SmartDashboard.putNumber("getAngleS", getAngleToHub(pose2).getDegrees());
     SmartDashboard.putNumber("getturretAngletohubS", degrees);
     SmartDashboard.putNumber("getturretAngle", getTurretAngle(pose2).getDegrees());
-
-
-    fieldActive.setRobotPose(pose2);
+    
     }
-    //SmartDashboard.putData("Fieldtest", fieldActive);
-  //   if (pose2 != null){
-  //   t_TurretSubsystem.setVoltage(
-  //       m_controller.calculate(getTurretAngleToHub(pose2).getDegrees(),0)
-  //       + m_feedforward.calculate(m_controller.getSetpoint().velocity));
-  //       SmartDashboard.putNumber("CalculatedFeed",m_feedforward.calculate(m_controller.getSetpoint().velocity));
-  // }
-  //     SmartDashboard.putNumber("Controller Velocity", m_controller.getSetpoint().velocity);
-
-
-
-
-
-      ArmPID.setSetpoint(0);
-       double value = ArmPID.calculate(degrees);
-       if(value > 0){
-        value += 0.017;
-       }else if(value < 0){
-        value += -0.017;
-       }
-       SmartDashboard.putNumber("hubpid", value);
-    //t_TurretSubsystem.setSpeed(MathUtil.clamp(value, -0.6, 0.6));
-     TrapezoidProfile m_profile =
-      new TrapezoidProfile(new TrapezoidProfile.Constraints(37.5, 7.5));
-      TrapezoidProfile.State m_goal = new TrapezoidProfile.State(0, 0);
-
-    // // Retrieve the profiled setpoint for the next timestep. This setpoint moves
-    // // toward the goal while obeying the constraints.
-    TrapezoidProfile.State currentState = new TrapezoidProfile.State(degrees, t_TurretSubsystem.getVel()*12);
-    
-    kDt = 0.0;
-
-    t_TurretSubsystem.setpoint(m_profile.calculate(kDt, currentState, m_goal));
-    SmartDashboard.putNumber("st",m_profile.timeLeftUntil(0));
-    SmartDashboard.putNumber("st2",m_profile.totalTime());
-    SmartDashboard.putNumber("spos", currentState.position);
-    SmartDashboard.putNumber("svel", currentState.velocity);
-   //SmartDashboard.putBoolean("sdobe", m_profile.);
-
-    
-    past = Timer.getFPGATimestamp();
-
+    double turretangle = getTurretAngleToHub(pose).getDegrees();
+    double distance = getDistance(pose);
+    double vy = CalculateVy(distance);
+    double vx = CalculateVx(distance, vy);
+    double vs = CalculateVs(vx, vy, 0);
+    double shootAngle = CalculateShootAngle(vx, vy, 0);
+    SmartDashboard.putNumber("shootAngle", shootAngle );
+    SmartDashboard.putNumber("shootSpeed", vs);
+    SmartDashboard.putNumber("shootSpeedx", vx);
+    SmartDashboard.putNumber("shootSpeedy", vy);
+    SmartDashboard.putNumber("poseturret angle", turretangle);
+     SmartDashboard.putNumber("poseturretdist", distance);
+      t_TurretSubsystem.goToAngleOffset(-turretangle);
+      h_HoodSubsystem.goToAngle(shootAngle);
+      s_ShooterSubsystem.setVelocity(vs * 2.35);
 
   }
   // Called once the command ends or is interrupted.
@@ -170,13 +130,50 @@ private double kS = 1.1;
     return getAngleToHub(pose).minus(pose.getRotation());
   }
 
+  /**
+   * getVrx:
+   *  unfinished 
+   * @return nothing right now.
+   */
+  public double getVrx(Pose2d pose){
+    LimelightHelpers.IMUData data = LimelightHelpers.getIMUData("limelight");
+    double gyrox = data.gyroX;
+    double gyroy = data.gyroY;
+    double gyroz = data.gyroZ;
+    double robotYaw = data.robotYaw;
+    Rotation2d angleToHub = getAngleToHub(pose);
+    double pitch = data.Pitch;
+    double roll = data.Roll;
+    double yaw = data.Yaw;
+    return 0;
+  }
+
+  
+
+  /**
+   * getVrz:
+   *  unfinished 
+   * @return nothing right now.
+   */
+  public double getVrz(Pose2d pose){
+    LimelightHelpers.IMUData data = LimelightHelpers.getIMUData("limelight");
+    double gyrox = data.gyroX;
+    double gyroy = data.gyroY;
+    double gyroz = data.gyroZ;
+    double robotYaw = data.robotYaw;
+    Rotation2d angleToHub = getAngleToHub(pose);
+    double pitch = data.Pitch;
+    double roll = data.Roll;
+    return 0;
+  }
+
 
   public double CalculateOffset(double Vrz, double Dx, double t){
     return Math.tanh((Vrz* t)/Dx);
   }
 
   public double CalculateVy(double Dx){
-    return 0.322959*Dx + 19.09439;
+    return 0.098438*Dx + 5.81997;
   }
 
   public double timeTillTarget(double Vy){
@@ -184,14 +181,13 @@ private double kS = 1.1;
     double b = Vy;
     double c = -(h-i);
     return (-b) - Math.sqrt((b * b) - (4* a * c));
-
   }
 
 
   public double CalculateVx(double distance, double Vy){
     double a = -g * distance * distance * 0.5;
     double b = Vy*distance;
-    double c = -(h- i);
+    double c = -(h - i);
     return (2*(a)) / ((-b) - Math.sqrt((b * b) - 4*(a * c)));
   }
 
@@ -200,7 +196,7 @@ private double kS = 1.1;
   }
 
   public double CalculateShootAngle(double Vx, double Vy, double Vrx){
-    return Math.tanh(Vy/(Vx - Vrx));
+    return Math.toDegrees(Math.atan(Vy/(Vx - Vrx)));
   }
 
   public double getVrz(Pose2d pose, double Vz){
@@ -214,5 +210,7 @@ private double kS = 1.1;
   public double getIMUYaw(){
     return LimelightHelpers.getIMUData("limelight").gyroY;
   }
+
+  
 
 }

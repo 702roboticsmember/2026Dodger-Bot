@@ -25,6 +25,8 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -34,27 +36,7 @@ public class TurretSubsystem extends SubsystemBase {
   private TalonFX Motor = new TalonFX(Constants.TurretConstants.TurretMotorID);
   private Rotation2d turretOffsetField = new Rotation2d();
   private Rotation2d turretPastValue = new Rotation2d(Constants.TurretConstants.initialAngle);
-  //private SparkMax Motor = new SparkMax(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushed);
-   
-
-  
-  
-  // Note: These gains are fake, and will have to be tuned for your robot.
-  private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(0.25, .15, 0.01);
-  private final VelocityVoltage driveVelocity = new VelocityVoltage(0);
-
-  // Create a motion profile with the given maximum velocity and maximum
-  // acceleration constraints for the next setpoint.
-  private final TrapezoidProfile m_profile =
-      new TrapezoidProfile(new TrapezoidProfile.Constraints(.175, .075));
-  private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
-  private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
-
-  
-  
-  // private Spark LeftMotor = new Spark(Constants.CoralIntakeConstants.LeftMotorID);
-  // private Spark RightMotor = new Spark(Constants.CoralIntakeConstants.RightMotorID);
- // private DigitalInput sensor = new DigitalInput(Constants.LIMIT_SWITCH_INTAKE);
+  private MotionMagicVoltage motionMagic = new MotionMagicVoltage(0);
   /** Creates a new ClimbSubsystem. */
    public TurretSubsystem() { 
     //m_encoderFR.setSimDevice(SimDevice.create("encoder"));
@@ -75,11 +57,14 @@ public class TurretSubsystem extends SubsystemBase {
               s_slot0Configs.kS = 0.25; // Add 0.25 V output to overcome static friction
               s_slot0Configs.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
               s_slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
-              s_slot0Configs.kP = 0.11; // An error of 1 rps results in 0.11 V output
+              s_slot0Configs.kP = 7.5; // An error of 1 rps results in 0.11 V output
               s_slot0Configs.kI = 0; // no output for integrated error
-              s_slot0Configs.kD = 0; // no output for error derivative
+              s_slot0Configs.kD = 0.1; // no output for error derivative
     
-    
+            var motionMagicConfigs = turretConfig.MotionMagic;
+              motionMagicConfigs.MotionMagicCruiseVelocity = 40; // Target cruise velocity of 80 rps
+              motionMagicConfigs.MotionMagicAcceleration = 80; // Target acceleration of 160 rps/s (0.5 seconds)
+              motionMagicConfigs.MotionMagicJerk = 800; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
       Motor.getConfigurator().apply(turretConfig);
     
@@ -92,6 +77,8 @@ public class TurretSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("turretangle", getAngleAsDouble());
     
     SmartDashboard.putNumber("limelightrobotyaw", getLimelightYaw());
+    SmartDashboard.putNumber("turretAngleTicks", getAngleAsTicks());
+
    
     // This method will be called once per scheduler run
   }
@@ -115,13 +102,22 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getAngleAsDouble() {
+    return getTicksToDegrees(Motor.getPosition().getValueAsDouble());
+  }
+  public double getAngleAsTicks() {
     return Motor.getPosition().getValueAsDouble();
   }
 
- 
+  public double getTicksToDegrees(double ticks){
+    return ticks * 360/14;
+  }
+
+ public double getDegreesToticks(double degrees){
+    return degrees * 14/360;
+  }
 
   public void setAngle(double degrees){
-    Motor.setPosition(degrees);
+    Motor.setPosition(getDegreesToticks(degrees));
   }
 
   public double getVel(){
@@ -138,18 +134,14 @@ public class TurretSubsystem extends SubsystemBase {
     return limelightMeasurement;
   }
 
-  public void setpoint(TrapezoidProfile.State m_setpoint){
-     
-     
-
-    double toOutputVelocity = m_setpoint.velocity;
-    SmartDashboard.putNumber("sovel", toOutputVelocity);
-
-            // toOutputVelocity = closedLoopLimiter.calculate(toOutputVelocity);
-
-            driveVelocity.Velocity = toOutputVelocity/32 ;
-            driveVelocity.FeedForward = m_feedforward.calculate(m_setpoint.velocity)/12;
-
-          Motor.setControl(driveVelocity);
+  public void goToAngle(double angle){
+    Motor.setControl(motionMagic.withPosition(getDegreesToticks(angle)));
   }
+
+  public void goToAngleOffset(double angleOffset){
+  
+    Motor.setControl(motionMagic.withPosition(getDegreesToticks(getAngleAsDouble() + angleOffset)));
+  
+  }
+
 }

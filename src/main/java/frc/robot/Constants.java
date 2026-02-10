@@ -162,7 +162,7 @@ public final class Constants {
             public static final int driveMotorID = 4;
             public static final int angleMotorID = 5;
             public static final int canCoderID = 6;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(35.08); //-145.11
+            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(216.08); //-145.11
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
         }
@@ -198,6 +198,30 @@ public final class Constants {
         public static final double LIMELIGHT_TURRET_POSE_X = 0.2;
 
     }
+    public static final class ShooterConstants {
+        public static final int shooterMotor1 = 16;
+        public static final int shooterMotor2 = 17;
+        
+     
+        public static final int STATOR_CURRENT_LIMIT = 60;
+        public static final int CURRENT_LIMIT = 50;//35
+        public static final int CURRENT_THRESHOLD = 60;//60
+        public static final double CURRENT_THRESHOLD_TIME = 0.1;
+        public static final boolean ENABLE_CURRENT_LIMIT = true;
+        public static final boolean ENABLE_STATOR_CURRENT_LIMIT = true;
+
+        public static final double CruiseVelocity = 80;
+        public static final double Acceleration = 160;
+        public static final double Jerk = 1600;
+
+        public static final double kS = .25;
+        public static final double kV = .12;
+        public static final double kA = .01;
+        public static final double kP = .11;
+        public static final double kI = 0;
+        public static final double kD = 0;
+        public static final double conversion = 1.5;
+    } 
 
     public static final class TurretConstants {
         public static Pose2d turretPose2d = new Pose2d();
@@ -209,8 +233,8 @@ public final class Constants {
         public static final double kD = 0.0042;
 
         public static final double PIDTolerance = 0.1;
-        public static final double reverseSoftLimit = 2; //-85
-        public static final double forwardSoftLimit = -2; //40
+        public static final double reverseSoftLimit = 4.23; //-85
+        public static final double forwardSoftLimit = -4.98; //40
         public static final boolean LimitEnable = true;
         public static final boolean MotorInverted = false;
         
@@ -230,8 +254,10 @@ public final class Constants {
 
     }
 
+    
+
     public static final class ReleaseConstants {
-        public static final int MotorID = 17;
+        public static final int MotorID = 31;
 
         public static final int CURRENT_LIMIT = 18;
        
@@ -250,7 +276,7 @@ public final class Constants {
 
     public static final class IntakeConstants {
         
-        public static final int IntakeMotorID = 16;
+        public static final int IntakeMotorID = 30;
         
         public static final double MaxIntakeSpeed = 1;
 
@@ -265,45 +291,33 @@ public final class Constants {
         public static final boolean ENABLE_STATOR_CURRENT_LIMIT = true;
     }
 
-    public static final class ShootSubsystem {
-        public static final int ShootMotorID = 19;
-
-        public static final InvertedValue ShootMotorInverted = InvertedValue.Clockwise_Positive;
+    public static final class HoodConstants {
         
-
-        public static final NeutralModeValue ShootMotorMode = NeutralModeValue.Coast;
-        
-        
-        public static final double MaxShootSpeed = 1;
-
-        public static final int STATOR_CURRENT_LIMIT = 80;
-        public static final int CURRENT_LIMIT = 80;
-        public static final int CURRENT_THRESHOLD = 80;
+        public static final int HoodMotor = 22;
+        public static final double kP = 0;
+        public static final double kI = 0;
+        public static final double kD = 0;
+        public static final double Tolerance = 0;
+        public static final int STATOR_CURRENT_LIMIT = 50;
+        public static final int CURRENT_LIMIT = 35;//35
+        public static final int CURRENT_THRESHOLD = 50;//60
         public static final double CURRENT_THRESHOLD_TIME = 0.1;
         public static final boolean ENABLE_CURRENT_LIMIT = true;
-        public static final boolean ENABLE_STATOR_CURRENT_LIMIT = true;
+        public static final boolean ENABLE_STATOR_CURRENT_LIMIT = false;
+         public static final boolean softLimitEnable = false;
+         public static final double conversion = ((16.0/50.0) * (12.0/150.0));
 
-        public static final double MotionMagicAcceleration = 400;
+        public static final double forwardLimit = 63;
 
-        public static final double MotionMagicJerk = 4000;
-
-        public static final double kS = 0.25; // Add 0.25 V output to overcome static friction
-        public static final double kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
-        public static final double kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
-        public static final double kP = 0.11; // An error of 1 rps results in 0.11 V output
-        public static final double kI = 0; // no output for integrated error
-        public static final double kD = 0;
-
-        public static final double ShootAngle = 45;//degrees
-
-        public static final double ShootHeight = 1.2;//feet
+        public static final double reverseLimit = 46.2;
+        public static final double initialAngle = 63.7;
     }
 
     public static final class AutoConstants { 
 
         public static final double kHeadingOffset = 90;
                                               // tuned to specific robot
-        public static final double kMaxSpeedMetersPerSecond = 7.5;
+        public static final double kMaxSpeedMetersPerSecond = 7.0;
         public static final double kMaxAccelerationMetersPerSecondSquared = 5.2;
         public static final double kMaxAngularSpeedRadiansPerSecond = 3 * Math.PI;
         public static final double kMaxAngularSpeedRadiansPerSecondSquared = 4* Math.PI;
@@ -328,9 +342,9 @@ public final class Constants {
     }
 
     public static final class PhysicsConstants {
-        public static final double gravity = 32.0;
-        public static final double HubHeight = 6.0;
-        public static final double BallIntialHeight = 1.0;
+        public static final double gravity = 9.81;
+        public static final double HubHeight = 1.89;
+        public static final double BallIntialHeight = 0.4572;
         
 
     }
