@@ -120,9 +120,9 @@ public class RobotContainer {
         homeGyro.onTrue(new InstantCommand(()->{s_Swerve.setposetoField();}));
         slowMode.onTrue(new InstantCommand(() -> RobotContainer.power = .333));
         fastMode.onTrue(new InstantCommand(() -> RobotContainer.power = 1));  
-        // Shoot.whileTrue(new ParallelCommandGroup(
-        //     Commands.runEnd(()->s_ShooterSubsystem.setVelocity(60), ()-> s_ShooterSubsystem.setVelocity(0), s_ShooterSubsystem),
-        //     Commands.runEnd(()->h_HoodSubsystem.goToAngle(50), ()-> h_HoodSubsystem.goToAngle(76), h_HoodSubsystem)));
+         Shoot.whileTrue(new ParallelCommandGroup(
+             Commands.runEnd(()->s_ShooterSubsystem.setVelocity(6), ()-> s_ShooterSubsystem.setVelocity(0), s_ShooterSubsystem),
+             Commands.runEnd(()->h_HoodSubsystem.goToAngle(50), ()-> h_HoodSubsystem.goToAngle(63), h_HoodSubsystem)));
         //Shoot.whileTrue(s_ShooterSubsystem.spin(()-> 0.1));
         //Shoot.onTrue(new InstantCommand(()->s_ShooterSubsystem.setVelocity(10)));
         //Shoot.onFalse(new InstantCommand(()->s_ShooterSubsystem.setVelocity(0)));
